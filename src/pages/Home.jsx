@@ -1,9 +1,11 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+
 import Hero from '../components/Hero';
 import Banner from '../components/Banner';
-import { Link } from 'react-router-dom';
 import Services from '../components/Services';
 import FeatureRooms from '../components/FeatureRooms';
+import Button from '../components/StyleHero';
 
 Hero.defaultProps = {
   hero: 'defaultHero',
@@ -24,6 +26,7 @@ const Home = () => {
       </Hero>
       <Services />
       <FeatureRooms />
+      <Button>home</Button>
     </>
   );
 };
