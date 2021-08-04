@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import items from './data';
+// import items from './data';
+import Client from './Contentful';
 
 const RoomContext = React.createContext();
 
@@ -19,6 +20,28 @@ const RoomProvider = ({ children }) => {
   const [pets, setPets] = useState(false);
 
   // functions
+  const getDataContentFul = async () => {
+    try {
+      const response = await Client.getEntries({
+        content_type: 'beachResortRooms',
+        order: 'fields.price',
+      });
+
+      const rooms = formatData(response.items);
+      const featureRooms = rooms.filter((room) => room.feature === true);
+      const maxPrice = Math.max(...rooms.map((item) => item.price));
+      const maxSize = Math.max(...rooms.map((item) => item.size));
+      setRooms(rooms);
+      setRooms(rooms);
+      setFeatureRooms(featureRooms);
+      setStoredRooms(rooms);
+      setLoading(false);
+      setMaxSize(maxSize);
+      setMaxPrice(maxPrice);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const formatData = (items) => {
     const data = items.map((item) => {
       const id = item.sys.id;
@@ -103,17 +126,7 @@ const RoomProvider = ({ children }) => {
 
   // get data
   useEffect(() => {
-    // setRooms(formatData(items));
-    const rooms = formatData(items);
-    const featureRooms = rooms.filter((room) => room.feature === true);
-    const maxPrice = Math.max(...rooms.map((item) => item.price));
-    const maxSize = Math.max(...rooms.map((item) => item.size));
-    setRooms(rooms);
-    setFeatureRooms(featureRooms);
-    setStoredRooms(rooms);
-    setLoading(false);
-    setMaxSize(maxSize);
-    setMaxPrice(maxPrice);
+    getDataContentFul();
   }, []);
 
   // values
