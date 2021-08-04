@@ -1,12 +1,9 @@
 import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
-import styled from 'styled-components';
-
-import defaultBcg from '../images/room-1.jpeg';
-import Hero from '../components/Hero';
 import Banner from '../components/Banner';
-import { RoomContext } from '../context';
 import StyleHero from '../components/StyleHero';
+import { RoomContext } from '../context';
+import defaultBcg from '../images/room-1.jpeg';
 
 SingleRoom.propTypes = {};
 

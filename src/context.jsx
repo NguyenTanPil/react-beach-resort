@@ -5,43 +5,25 @@ import Client from './Contentful';
 const RoomContext = React.createContext();
 
 const RoomProvider = ({ children }) => {
+  // states
   const [rooms, setRooms] = useState([]);
   const [storedRooms, setStoredRooms] = useState([]);
   const [featureRooms, setFeatureRooms] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [type, setType] = useState('all');
-  const [capacity, setCapacity] = useState(1);
-  const [price, setPrice] = useState(0);
-  const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(0);
-  const [minSize, setMinSize] = useState(0);
-  const [maxSize, setMaxSize] = useState(0);
-  const [breakfast, setBreakfast] = useState(false);
-  const [pets, setPets] = useState(false);
+  const [filter, setFilter] = useState({
+    type: 'all',
+    capacity: 1,
+    price: 0,
+    minPrice: 0,
+    maxPrice: 0,
+    minSize: 0,
+    maxSize: 0,
+    breakfast: false,
+    pets: false,
+  });
 
   // functions
-  const getDataContentFul = async () => {
-    try {
-      const response = await Client.getEntries({
-        content_type: 'beachResortRooms',
-        order: 'fields.price',
-      });
 
-      const rooms = formatData(response.items);
-      const featureRooms = rooms.filter((room) => room.feature === true);
-      const maxPrice = Math.max(...rooms.map((item) => item.price));
-      const maxSize = Math.max(...rooms.map((item) => item.size));
-      setRooms(rooms);
-      setRooms(rooms);
-      setFeatureRooms(featureRooms);
-      setStoredRooms(rooms);
-      setLoading(false);
-      setMaxSize(maxSize);
-      setMaxPrice(maxPrice);
-    } catch (error) {
-      console.log(error);
-    }
-  };
   const formatData = (items) => {
     const data = items.map((item) => {
       const id = item.sys.id;
@@ -59,35 +41,52 @@ const RoomProvider = ({ children }) => {
     const element = e.target;
     const value = e.type === 'checkbox' ? element.checked : element.value;
     const name = e.target.name;
-    if (name === 'type') {
-      setType(value);
-    } else if (name === 'capacity') {
-      setCapacity(value);
-    } else if (name === 'price') {
-      setPrice(value);
-    } else if (name === 'minSize') {
-      setMinSize(value);
-    } else if (name === 'maxSize') {
-      setMaxSize(value);
-    } else if (name === 'breakfast') {
-      setBreakfast(!breakfast);
-    } else if (name === 'pets') {
-      setPets(!pets);
-    }
+    setFilter({
+      ...filter,
+      [name]: value,
+    });
   };
+
+  // get data
+  useEffect(() => {
+    const getDataContentFul = async () => {
+      try {
+        const response = await Client.getEntries({
+          content_type: 'beachResortRooms',
+          order: 'fields.price',
+        });
+
+        const rooms = formatData(response.items);
+        const featureRooms = rooms.filter((room) => room.feature === true);
+        const maxPrice = Math.max(...rooms.map((item) => item.price));
+        const maxSize = Math.max(...rooms.map((item) => item.size));
+        setRooms(rooms);
+        setFeatureRooms(featureRooms);
+        setStoredRooms(rooms);
+        setLoading(false);
+        setFilter((filter) => {
+          return { ...filter, maxSize: maxSize, maxPrice: maxPrice };
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getDataContentFul();
+  }, []);
+
   // filter change
   useEffect(() => {
     let tempRooms = [...rooms];
 
     // filter by type
-    if (type !== 'all') {
+    if (filter.type !== 'all') {
       tempRooms = tempRooms.filter((room) => {
-        return room.type === type;
+        return room.type === filter.type;
       });
     }
 
     // filter by capacity
-    const people = parseInt(capacity);
+    const people = parseInt(filter.capacity);
     if (people !== 1) {
       tempRooms = tempRooms.filter((room) => {
         return room.capacity === people;
@@ -95,7 +94,7 @@ const RoomProvider = ({ children }) => {
     }
 
     // filter by price
-    const tempPrice = parseInt(price);
+    const tempPrice = parseInt(filter.price);
     if (tempPrice !== 0) {
       tempRooms = tempRooms.filter((room) => {
         return room.price <= tempPrice;
@@ -104,30 +103,28 @@ const RoomProvider = ({ children }) => {
 
     // filter by size
     tempRooms = tempRooms.filter((room) => {
-      return room.size >= parseInt(minSize) && room.size <= parseInt(maxSize);
+      return (
+        room.size >= parseInt(filter.minSize) &&
+        room.size <= parseInt(filter.maxSize)
+      );
     });
 
     // filter by breakfast
-    if (breakfast) {
+    if (filter.breakfast) {
       tempRooms = tempRooms.filter((room) => {
         return room.breakfast === true;
       });
     }
 
     // filter by pets
-    if (pets) {
+    if (filter.pets) {
       tempRooms = tempRooms.filter((room) => {
         return room.pets === true;
       });
     }
 
     setStoredRooms(tempRooms);
-  }, [type, capacity, price, breakfast, minSize, maxSize, pets]);
-
-  // get data
-  useEffect(() => {
-    getDataContentFul();
-  }, []);
+  }, [filter, rooms]);
 
   // values
   const values = {
@@ -136,15 +133,7 @@ const RoomProvider = ({ children }) => {
     storedRooms,
     loading,
     getRoom,
-    type,
-    capacity,
-    price,
-    minPrice,
-    maxPrice,
-    minSize,
-    maxSize,
-    breakfast,
-    pets,
+    filter,
     handleChange,
   };
 

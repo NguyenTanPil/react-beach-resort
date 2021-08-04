@@ -7,8 +7,8 @@ const getUnique = (items, value) => {
 };
 
 export default function RomsFilter({ rooms }) {
+  const { handleChange, filter } = useContext(RoomContext);
   const {
-    handleChange,
     type,
     capacity,
     price,
@@ -18,7 +18,8 @@ export default function RomsFilter({ rooms }) {
     maxSize,
     breakfast,
     pets,
-  } = useContext(RoomContext);
+  } = filter;
+
   // get unique type
   let types = getUnique(rooms, 'type');
   // add all types
@@ -39,6 +40,7 @@ export default function RomsFilter({ rooms }) {
       </option>
     );
   });
+
   return (
     <section className="filter-container">
       <Title title="search rooms" />
