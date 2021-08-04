@@ -39,7 +39,7 @@ const RoomProvider = ({ children }) => {
   };
   const handleChange = (e) => {
     const element = e.target;
-    const value = e.type === 'checkbox' ? element.checked : element.value;
+    const value = element.type === 'checkbox' ? element.checked : element.value;
     const name = e.target.name;
     setFilter({
       ...filter,
